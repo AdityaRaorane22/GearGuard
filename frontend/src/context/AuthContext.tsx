@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { getCurrentUser, login as loginApi, logout as logoutApi, signup as signupApi, isAuthenticated } from "../services/authService";
 import { User } from "../types";
 
@@ -64,10 +64,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextValue => {
+export const useAuth = (): AuthContextValue & { isAuthenticated: boolean } => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return ctx;
+  return {
+    ...ctx,
+    isAuthenticated: !!ctx.user,
+  };
 };
