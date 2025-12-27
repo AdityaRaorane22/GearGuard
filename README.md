@@ -1,34 +1,74 @@
-# GearGuard - Maintenance Management System
+# ⚙️ GearGuard – Maintenance Management System
 
-A comprehensive ERP-style maintenance management system built for tracking organizational equipment and managing maintenance workflows.
+A comprehensive **maintenance management system** for tracking equipment, work centers, maintenance requests, and team workflows.
 
-## 🚀 Features
+---
 
-- **Authentication & Authorization**: JWT-based authentication with role-based access control (User, Technician, Manager, Admin)
-- **Equipment Tracking**: Centralized management of organizational assets
-- **Maintenance Workflows**: Support for corrective and preventive maintenance
-- **Team Management**: Organize technicians into specialized teams
-- **Kanban Board**: Visual workflow management (coming soon)
-- **Calendar View**: Schedule preventive maintenance tasks (coming soon)
+## 🔋 Features
 
-## 🛠️ Technology Stack
+### Core Functionality
+- **Equipment Management** – Track machines, tools, and equipment with health monitoring  
+- **Maintenance Requests** – Corrective and preventive maintenance workflows  
+- **Work Centers** – Location-based capacity and cost tracking  
+- **Maintenance Teams** – Technician grouping with role-based assignments  
+- **Calendar View** – Interactive scheduling for maintenance activities  
+- **Kanban Board** – Drag-and-drop request status management  
+- **Reporting & Analytics** – Real-time dashboards and trend analysis  
+- **User Authentication** – Secure JWT-based authentication with RBAC  
+
+---
+
+## 📊 Dashboard Metrics
+- Critical equipment health monitoring  
+- Technician workload tracking  
+- Open requests & overdue alerts  
+- Recent maintenance requests with search  
+
+---
+
+## 📝 Request Management
+- Priority levels: **Low, Medium, High, Urgent**  
+- Status tracking: **New, In Progress, Repaired, Scrap**  
+- Equipment or work center targeting  
+- Team & technician assignment  
+- Scheduled date planning  
+
+---
+
+## 🛠 Tech Stack
 
 ### Backend
-- **Python 3.10+**
-- **FastAPI** - Modern web framework
-- **SQLAlchemy** - ORM
-- **PostgreSQL** - Database
-- **JWT** - Authentication
-- **Pydantic** - Data validation
+- **Framework:** FastAPI (Python)  
+- **Database:** PostgreSQL  
+- **ORM:** SQLAlchemy  
+- **Authentication:** JWT (JSON Web Tokens)  
+- **Validation:** Pydantic  
+- **API Docs:** Swagger / OpenAPI (auto-generated)  
 
 ### Frontend
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **React Query** - Data fetching
-- **React Router** - Routing
-- **Axios** - HTTP client
+- **Framework:** React 18 + TypeScript  
+- **Routing:** React Router v6  
+- **State Management:** TanStack Query + Context API  
+- **Styling:** Tailwind CSS  
+- **Build Tool:** Vite  
+- **HTTP Client:** Axios  
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+- Python **3.10+**  
+- Node.js **18+** (npm or yarn)  
+- PostgreSQL **14+**
+
+---
+
+## 🔧 Backend Setup
+
+```bash
+cd backend
+
 
 ## 📋 Prerequisites
 
@@ -192,15 +232,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-## 🚧 Upcoming Features
-
-- Equipment Management Module
-- Maintenance Team Management
-- Maintenance Request Workflow
-- Kanban Board with drag-and-drop
-- Calendar View for preventive maintenance
-- Analytics and Reporting
-- Email Notifications
 
 ## 📄 License
 
