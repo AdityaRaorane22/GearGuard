@@ -30,6 +30,7 @@ export interface LoginResponse {
     user: User;
 }
 
+// Checked types/auth.ts content if needed.
 export interface AuthContextType {
     user: User | null;
     token: string | null;

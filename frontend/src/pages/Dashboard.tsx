@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { Navigation } from '../components/Navigation';
@@ -25,6 +26,7 @@ const getStatusBadge = (status: string) => {
 export const Dashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const { showToast } = useToast();
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ export const Dashboard: React.FC = () => {
                     {/* Page Header with Actions */}
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-3xl font-bold text-gray-900">Maintenance Overview</h2>
-                        <button className="btn-primary">
+                        <button onClick={() => navigate('/request/new')} className="btn-primary">
                             <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
@@ -165,12 +167,12 @@ export const Dashboard: React.FC = () => {
                         />
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="mb-6">
-                        <div className="relative">
+                    {/* Search and Actions */}
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="relative flex-1 max-w-md">
                             <input
                                 type="text"
-                                placeholder="Search requests by subject, employee, technician, or category..."
+                                placeholder="Search requests..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="input-field pl-10"
@@ -184,6 +186,16 @@ export const Dashboard: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
+
+                        <button
+                            onClick={() => navigate('/request/new')}
+                            className="btn-primary ml-4"
+                        >
+                            <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            New Request
+                        </button>
                     </div>
 
                     {/* Maintenance Requests Table */}
@@ -226,11 +238,12 @@ export const Dashboard: React.FC = () => {
                                         filteredRequests.map((request) => (
                                             <tr
                                                 key={request.id}
+                                                onClick={() => navigate(`/request/${request.id}`)}
                                                 className="hover:bg-gray-50 cursor-pointer transition-colors"
                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
-                                                        {request.isOverdue && (
+                                                        {request.is_overdue && (
                                                             <svg className="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                                             </svg>

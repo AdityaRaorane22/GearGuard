@@ -7,6 +7,13 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Dashboard } from './pages/Dashboard';
+import { EquipmentPage } from './pages/Equipment';
+import { EquipmentDetail } from './pages/EquipmentDetail';
+import { NewEquipment } from './pages/NewEquipment';
+import { Teams } from './pages/Teams';
+import { TeamForm } from './pages/TeamForm';
+import { NewRequest } from './pages/NewRequest';
+import { RequestDetail } from './pages/RequestDetail';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -37,8 +44,53 @@ const AppRoutes: React.FC = () => {
             <Route
                 path="/dashboard"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute roles={['Manager', 'Admin']}>
                         <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/equipment"
+                element={
+                    <ProtectedRoute>
+                        <EquipmentPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/equipment/new"
+                element={
+                    <ProtectedRoute>
+                        <NewEquipment />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/equipment/:id"
+                element={
+                    <ProtectedRoute>
+                        <EquipmentDetail />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/request/new"
+                element={
+                    <ProtectedRoute>
+                        <NewRequest />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/request/:id"
+                element={
+                    <ProtectedRoute>
+                        <RequestDetail />
                     </ProtectedRoute>
                 }
             />
@@ -58,6 +110,32 @@ const AppRoutes: React.FC = () => {
                 element={
                     <ProtectedRoute>
                         <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Teams Routes */}
+            <Route
+                path="/teams"
+                element={
+                    <ProtectedRoute>
+                        <Teams />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/teams/new"
+                element={
+                    <ProtectedRoute>
+                        <TeamForm />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/teams/:id"
+                element={
+                    <ProtectedRoute>
+                        <TeamForm />
                     </ProtectedRoute>
                 }
             />

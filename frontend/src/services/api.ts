@@ -43,17 +43,17 @@ apiClient.interceptors.response.use(
 // Auth API methods
 export const authApi = {
     signup: async (data: SignupRequest): Promise<User> => {
-        const response = await apiClient.post<User>('/auth/signup', data);
+        const response = await apiClient.post<User>('/api/auth/signup', data);
         return response.data;
     },
 
     login: async (data: LoginRequest): Promise<LoginResponse> => {
-        const response = await apiClient.post<LoginResponse>('/auth/login', data);
+        const response = await apiClient.post<LoginResponse>('/api/auth/login', data);
         return response.data;
     },
 
     getCurrentUser: async (): Promise<User> => {
-        const response = await apiClient.get<User>('/auth/me');
+        const response = await apiClient.get<User>('/api/auth/me');
         return response.data;
     },
 };

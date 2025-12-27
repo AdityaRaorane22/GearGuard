@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLEnum, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum as SQLEnum, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..database import Base
@@ -37,11 +37,14 @@ class MaintenanceRequest(Base):
     # Foreign keys
     equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    maintenance_team_id = Column(Integer, ForeignKey("maintenance_teams.id"), nullable=True)
     
     # Dates
     scheduled_date = Column(DateTime, nullable=True)
     completion_date = Column(DateTime, nullable=True)
+    duration = Column(Float, nullable=True)  # Duration in hours
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -51,7 +54,9 @@ class MaintenanceRequest(Base):
     # Relationships
     equipment = relationship("Equipment", back_populates="maintenance_requests")
     requester = relationship("User", foreign_keys=[requester_id], backref="created_requests")
+    requester = relationship("User", foreign_keys=[requester_id], backref="created_requests")
     technician = relationship("User", foreign_keys=[technician_id], backref="assigned_requests")
+    maintenance_team = relationship("MaintenanceTeam", backref="requests")
 
     @property
     def is_overdue(self) -> bool:
