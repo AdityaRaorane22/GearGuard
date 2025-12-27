@@ -13,7 +13,7 @@ export const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={[
-      "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm",
+      "fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=open]:fade-in-0",
       "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
       className,
@@ -32,7 +32,7 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={[
-        "fixed z-50 grid w-full max-w-lg gap-4 border border-slate-800 bg-slate-900 p-6 shadow-lg",
+        "fixed z-50 grid w-full max-w-lg gap-4 border border-slate-200 bg-white p-6 shadow-xl",
         "duration-200 rounded-xl",
         "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
         "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
@@ -59,7 +59,7 @@ export const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className = "", ...props }, ref) => (
-  <DialogPrimitive.Title ref={ref} className={["text-lg font-semibold leading-none tracking-tight", className].join(" ")} {...props} />
+  <DialogPrimitive.Title ref={ref} className={["text-lg font-semibold leading-none tracking-tight text-slate-900", className].join(" ")} {...props} />
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
@@ -67,6 +67,6 @@ export const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className = "", ...props }, ref) => (
-  <DialogPrimitive.Description ref={ref} className={["text-sm text-slate-400", className].join(" ")} {...props} />
+  <DialogPrimitive.Description ref={ref} className={["text-sm text-slate-500", className].join(" ")} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;

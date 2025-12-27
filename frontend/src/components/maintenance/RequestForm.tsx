@@ -126,10 +126,10 @@ const RequestForm: React.FC<RequestFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white border-slate-200">
         <DialogHeader>
-          <DialogTitle>Create Maintenance Request</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-slate-900">Create Maintenance Request</DialogTitle>
+          <DialogDescription className="text-slate-500">
             Create a new maintenance request for your equipment.
           </DialogDescription>
         </DialogHeader>
@@ -137,11 +137,11 @@ const RequestForm: React.FC<RequestFormProps> = ({
         <form onSubmit={onSubmit} className="space-y-4 mt-2">
           {/* Equipment Dropdown */}
           <div className="relative flex flex-col">
-            <label className="text-xs text-slate-400 mb-1">
-              Equipment<span className="text-rose-400">*</span>
+            <label className="text-xs text-slate-500 mb-1">
+              Equipment<span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 value={equipmentSearch}
@@ -151,11 +151,11 @@ const RequestForm: React.FC<RequestFormProps> = ({
                     ? selectedEquipment.equipmentName
                     : "Search equipment..."
                 }
-                className="w-full pl-9 pr-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full pl-9 pr-3"
               />
             </div>
             {equipmentSearch && filteredEquipment.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                 {filteredEquipment.map((e) => (
                   <button
                     key={e.id}
@@ -164,10 +164,10 @@ const RequestForm: React.FC<RequestFormProps> = ({
                       setSelectedEquipment(e);
                       setEquipmentSearch("");
                     }}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-800 border-b border-slate-800 last:border-b-0"
+                    className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-b-0"
                   >
-                    <div className="font-medium text-sm">{e.equipmentName}</div>
-                    <div className="text-xs text-slate-400">
+                    <div className="font-medium text-sm text-slate-900">{e.equipmentName}</div>
+                    <div className="text-xs text-slate-500">
                       SN: {e.serialNumber} • {e.category}
                     </div>
                   </button>
@@ -179,19 +179,19 @@ const RequestForm: React.FC<RequestFormProps> = ({
           {/* Selected Equipment Info */}
           {selectedEquipment && (
             <div className="grid grid-cols-3 gap-3 text-xs">
-              <div className="bg-slate-800/50 rounded-lg p-2">
-                <div className="text-slate-400 mb-0.5">Category</div>
-                <div className="font-medium capitalize">{selectedEquipment.category}</div>
+              <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                <div className="text-slate-500 mb-0.5">Category</div>
+                <div className="font-medium capitalize text-slate-900">{selectedEquipment.category}</div>
               </div>
-              <div className="bg-slate-800/50 rounded-lg p-2">
-                <div className="text-slate-400 mb-0.5">Department</div>
-                <div className="font-medium">
+              <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                <div className="text-slate-500 mb-0.5">Department</div>
+                <div className="font-medium text-slate-900">
                   {selectedEquipment.department || "N/A"}
                 </div>
               </div>
-              <div className="bg-slate-800/50 rounded-lg p-2">
-                <div className="text-slate-400 mb-0.5">Assigned Team</div>
-                <div className="font-medium">
+              <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                <div className="text-slate-500 mb-0.5">Assigned Team</div>
+                <div className="font-medium text-slate-900">
                   {selectedEquipment.maintenanceTeam?.teamName || "Unassigned"}
                 </div>
               </div>
@@ -201,13 +201,13 @@ const RequestForm: React.FC<RequestFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Request Type */}
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">
-                Request Type<span className="text-rose-400">*</span>
+              <label className="text-xs text-slate-500 mb-1">
+                Request Type<span className="text-rose-500">*</span>
               </label>
               <select
                 value={requestType}
                 onChange={(e) => setRequestType(e.target.value as RequestType)}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full appearance-none cursor-pointer"
               >
                 {REQUEST_TYPE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -220,14 +220,14 @@ const RequestForm: React.FC<RequestFormProps> = ({
             {/* Scheduled Date (Preventive only) */}
             {requestType === RequestType.PREVENTIVE && (
               <div className="flex flex-col">
-                <label className="text-xs text-slate-400 mb-1">
-                  Scheduled Date<span className="text-rose-400">*</span>
+                <label className="text-xs text-slate-500 mb-1">
+                  Scheduled Date<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="glass-input w-full"
                   required={requestType === RequestType.PREVENTIVE}
                 />
               </div>
@@ -236,32 +236,32 @@ const RequestForm: React.FC<RequestFormProps> = ({
 
           {/* Subject */}
           <div className="flex flex-col">
-            <label className="text-xs text-slate-400 mb-1">
-              Subject<span className="text-rose-400">*</span>
+            <label className="text-xs text-slate-500 mb-1">
+              Subject<span className="text-rose-500">*</span>
             </label>
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="e.g. Abnormal vibration detected"
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="glass-input w-full"
               required
             />
           </div>
 
           {/* Description */}
           <div className="flex flex-col">
-            <label className="text-xs text-slate-400 mb-1">Description</label>
+            <label className="text-xs text-slate-500 mb-1">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional details about the request..."
               rows={3}
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="glass-input w-full resize-none"
             />
           </div>
 
           {error && (
-            <div className="text-rose-300 bg-rose-900/30 border border-rose-800 rounded-lg px-3 py-2 text-sm">
+            <div className="text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 text-sm">
               {error}
             </div>
           )}
@@ -270,14 +270,14 @@ const RequestForm: React.FC<RequestFormProps> = ({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm"
+              className="btn-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!canSubmit || submitting}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-sm font-medium"
+              className="btn-primary disabled:opacity-60"
             >
               {submitting ? "Creating..." : "Create Request"}
             </button>

@@ -9,13 +9,21 @@ import {
 import { MaintenanceRequest, RequestStage, MaintenanceTeam, Equipment } from "../types";
 import { getRequests, updateRequestStage } from "../services/maintenanceService";
 import api from "../services/api";
-import { AlertCircle } from "lucide-react";
+import { 
+  AlertCircle, 
+  Calendar, 
+  Filter, 
+  Plus, 
+  User, 
+  Wrench,
+  MoreHorizontal
+} from "lucide-react";
 
-const STAGES: { value: RequestStage; label: string }[] = [
-  { value: RequestStage.NEW, label: "New" },
-  { value: RequestStage.IN_PROGRESS, label: "In Progress" },
-  { value: RequestStage.REPAIRED, label: "Repaired" },
-  { value: RequestStage.SCRAP, label: "Scrap" },
+const STAGES: { value: RequestStage; label: string; color: string }[] = [
+  { value: RequestStage.NEW, label: "New", color: "bg-blue-500" },
+  { value: RequestStage.IN_PROGRESS, label: "In Progress", color: "bg-amber-500" },
+  { value: RequestStage.REPAIRED, label: "Repaired", color: "bg-emerald-500" },
+  { value: RequestStage.SCRAP, label: "Scrap", color: "bg-rose-500" },
 ];
 
 const MaintenanceRequests: React.FC = () => {
@@ -124,8 +132,11 @@ const MaintenanceRequests: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[50vh] grid place-items-center">
-        <div className="animate-spin h-10 w-10 rounded-full border-4 border-emerald-400 border-t-transparent" />
+      <div className="min-h-[60vh] grid place-items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-10 w-10 rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="text-slate-500 animate-pulse">Loading requests...</p>
+        </div>
       </div>
     );
   }
@@ -133,36 +144,54 @@ const MaintenanceRequests: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-[50vh] grid place-items-center">
-        <div className="text-rose-300 bg-rose-900/30 border border-rose-800 rounded-lg px-4 py-3">
-          {error}
+        <div className="bg-white border border-rose-200 text-rose-600 flex items-center gap-3 p-4 rounded-lg shadow-sm">
+          <AlertCircle size={24} />
+          <span>{error}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center gap-3 justify-between">
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:max-w-2xl">
-          <div className="flex flex-col flex-1">
-            <label className="text-xs text-slate-400 mb-1">Team</label>
+    <div className="space-y-8 h-[calc(100vh-8rem)] flex flex-col">
+      {/* Header & Filters */}
+      <div className="flex flex-col gap-6 flex-shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Maintenance Board</h1>
+            <p className="text-slate-500 text-sm">Track and manage maintenance requests</p>
+          </div>
+          <Link
+            to="/requests/new"
+            className="btn-primary flex items-center gap-2 self-start md:self-auto"
+          >
+            <Plus size={18} />
+            <span>New Request</span>
+          </Link>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center shadow-sm">
+          <div className="flex items-center gap-2 text-slate-500 mr-2">
+            <Filter size={16} />
+            <span className="text-sm font-medium">Filters:</span>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:max-w-2xl">
             <select
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="glass-input w-full appearance-none cursor-pointer"
             >
               <option value="">All Teams</option>
               {teams.map((t) => (
                 <option key={t.id} value={t.id}>{t.teamName}</option>
               ))}
             </select>
-          </div>
-          <div className="flex flex-col flex-1">
-            <label className="text-xs text-slate-400 mb-1">Equipment</label>
+            
             <select
               value={equipmentFilter}
               onChange={(e) => setEquipmentFilter(e.target.value)}
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="glass-input w-full appearance-none cursor-pointer"
             >
               <option value="">All Equipment</option>
               {equipment.map((e) => (
@@ -171,108 +200,100 @@ const MaintenanceRequests: React.FC = () => {
             </select>
           </div>
         </div>
-        <Link
-          to="/equipment/new"
-          className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium"
-        >
-          + New Request
-        </Link>
       </div>
 
+      {/* Kanban Board */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {STAGES.map((stage) => (
-            <div key={stage.value} className="flex flex-col gap-3">
-              <div className="bg-slate-800/50 border border-slate-800 rounded-lg px-4 py-2 sticky top-0 z-10">
-                <h3 className="text-sm font-semibold">
-                  {stage.label} <span className="text-xs text-slate-400">({grouped[stage.value].length})</span>
-                </h3>
-              </div>
-              <Droppable droppableId={stage.value}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={[
-                      "flex-1 space-y-3 p-2 rounded-lg min-h-[60vh] transition-colors",
-                      snapshot.isDraggingOver
-                        ? "bg-emerald-500/10 border border-emerald-500/50"
-                        : "bg-slate-900/30 border border-slate-800/30",
-                    ].join(" ")}
-                  >
-                    {grouped[stage.value].map((request, index) => (
-                      <Draggable key={request.id} draggableId={request.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={[
-                              "bg-slate-900 border border-slate-800 rounded-lg p-3 text-sm transition-all",
-                              snapshot.isDragging ? "rotate-2 shadow-lg shadow-emerald-500/30" : "",
-                              updating === request.id ? "opacity-60" : "",
-                            ].join(" ")}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
+        <div className="flex-1 overflow-x-auto pb-4">
+          <div className="flex gap-6 min-w-[1000px] h-full">
+            {STAGES.map((stage) => (
+              <div key={stage.value} className="flex-1 flex flex-col min-w-[280px] bg-slate-50 border border-slate-200 rounded-xl border-t-4" style={{ borderTopColor: stage.color.replace('bg-', 'var(--tw-colors-') }}>
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-slate-50/95 backdrop-blur-sm rounded-t-xl z-10">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                    <h3 className="font-semibold text-slate-900">{stage.label}</h3>
+                  </div>
+                  <span className="bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                    {grouped[stage.value].length}
+                  </span>
+                </div>
+                
+                <Droppable droppableId={stage.value}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`flex-1 p-3 space-y-3 overflow-y-auto custom-scrollbar transition-colors ${
+                        snapshot.isDraggingOver ? "bg-slate-100" : ""
+                      }`}
+                    >
+                      {grouped[stage.value].map((request, index) => (
+                        <Draggable key={request.id} draggableId={request.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`
+                                bg-white border border-slate-200 rounded-xl p-4 
+                                hover:shadow-md transition-all group
+                                ${snapshot.isDragging ? "rotate-2 shadow-xl scale-105 z-50 ring-2 ring-blue-500/50" : "shadow-sm"}
+                                ${updating === request.id ? "opacity-50" : ""}
+                              `}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-2">
                                 <Link
                                   to={`/requests/${request.id}`}
-                                  className="block font-medium truncate hover:text-emerald-400"
+                                  className="font-medium text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight"
                                 >
                                   {request.subject}
                                 </Link>
-                                <div className="text-xs text-slate-400 truncate">
-                                  {request.equipment?.equipmentName || "Unknown Equipment"}
-                                </div>
+                                <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                                  <MoreHorizontal size={16} />
+                                </button>
                               </div>
-                              {request.isOverdue && (
-                                <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
-                              )}
-                            </div>
 
-                            <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                              <span className="inline-block px-2 py-0.5 rounded-full bg-slate-800">
-                                {request.requestType}
-                              </span>
-                              {request.maintenanceTeam && (
-                                <span className="inline-block px-2 py-0.5 rounded-full bg-slate-800">
-                                  {request.maintenanceTeam.teamName.slice(0, 10)}
+                              <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                                <Wrench size={12} />
+                                <span className="truncate max-w-[150px]">{request.equipment?.equipmentName || "Unknown"}</span>
+                              </div>
+
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                <span className="px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-[10px] text-slate-600 uppercase tracking-wider">
+                                  {request.requestType}
                                 </span>
-                              )}
+                                {request.isOverdue && (
+                                  <span className="px-2 py-1 rounded-md bg-rose-50 border border-rose-100 text-[10px] text-rose-600 uppercase tracking-wider flex items-center gap-1">
+                                    <AlertCircle size={10} /> Overdue
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                                <div className="flex items-center gap-1.5" title="Assigned Technician">
+                                  <User size={12} />
+                                  <span className="truncate max-w-[100px]">
+                                    {request.assignedTechnician?.fullName?.split(' ')[0] || "Unassigned"}
+                                  </span>
+                                </div>
+                                {request.scheduledDate && (
+                                  <div className="flex items-center gap-1.5" title="Scheduled Date">
+                                    <Calendar size={12} />
+                                    <span>{new Date(request.scheduledDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-
-                            {request.assignedTechnician && (
-                              <div className="mt-2 text-xs text-slate-300">
-                                👤 {request.assignedTechnician.fullName || request.assignedTechnician.username}
-                              </div>
-                            )}
-
-                            {request.scheduledDate && (
-                              <div className="mt-2 text-xs text-slate-400">
-                                📅 {new Date(request.scheduledDate).toLocaleDateString()}
-                              </div>
-                            )}
-
-                            {request.isOverdue && (
-                              <div className="mt-2 text-xs text-rose-300">
-                                ⚠️ Overdue
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    {grouped[stage.value].length === 0 && (
-                      <div className="text-center py-6 text-slate-500 text-xs">
-                        No requests
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            ))}
+          </div>
         </div>
       </DragDropContext>
     </div>

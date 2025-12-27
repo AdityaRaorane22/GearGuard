@@ -157,40 +157,40 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ open, onOpenChange, mode 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-white border-slate-200">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogTitle className="text-slate-900">{title}</DialogTitle>
+          <DialogDescription className="text-slate-500">{description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="space-y-4 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Name<span className="text-rose-400">*</span></label>
+              <label className="text-xs text-slate-700 mb-1">Name<span className="text-rose-500">*</span></label>
               <input
                 value={equipmentName}
                 onChange={(e) => setEquipmentName(e.target.value)}
                 placeholder="e.g. CNC Lathe"
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
                 required
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Serial Number<span className="text-rose-400">*</span></label>
+              <label className="text-xs text-slate-700 mb-1">Serial Number<span className="text-rose-500">*</span></label>
               <input
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value)}
                 placeholder="e.g. SN-123456"
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
                 required
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Category<span className="text-rose-400">*</span></label>
+              <label className="text-xs text-slate-700 mb-1">Category<span className="text-rose-500">*</span></label>
               <select
                 value={category}
                 onChange={(e) => setCategory((e.target.value as Category) || "")}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full appearance-none cursor-pointer"
                 required
               >
                 <option value="">Select category</option>
@@ -200,47 +200,47 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ open, onOpenChange, mode 
               </select>
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Department</label>
+              <label className="text-xs text-slate-700 mb-1">Department</label>
               <input
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 placeholder="e.g. Production"
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Location</label>
+              <label className="text-xs text-slate-700 mb-1">Location</label>
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Bay A"
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Purchase Date</label>
+              <label className="text-xs text-slate-700 mb-1">Purchase Date</label>
               <input
                 type="date"
                 value={purchaseDate || ""}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Warranty Expiry</label>
+              <label className="text-xs text-slate-700 mb-1">Warranty Expiry</label>
               <input
                 type="date"
                 value={warrantyExpiry || ""}
                 onChange={(e) => setWarrantyExpiry(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Maintenance Team</label>
+              <label className="text-xs text-slate-700 mb-1">Maintenance Team</label>
               <select
                 value={maintenanceTeamId}
                 onChange={(e) => setMaintenanceTeamId(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full appearance-none cursor-pointer"
               >
                 <option value="">Unassigned</option>
                 {teams.map((t) => (
@@ -249,11 +249,11 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ open, onOpenChange, mode 
               </select>
             </div>
             <div className="flex flex-col">
-              <label className="text-xs text-slate-400 mb-1">Assign Employee</label>
+              <label className="text-xs text-slate-700 mb-1">Assign Employee</label>
               <select
                 value={assignedEmployeeId}
                 onChange={(e) => setAssignedEmployeeId(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="glass-input w-full appearance-none cursor-pointer"
                 disabled={!maintenanceTeamId || teamMembers.length === 0}
               >
                 <option value="">Unassigned</option>
@@ -268,7 +268,7 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ open, onOpenChange, mode 
           </div>
 
           {error && (
-            <div className="text-rose-300 bg-rose-900/30 border border-rose-800 rounded-lg px-3 py-2 text-sm">
+            <div className="text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 text-sm">
               {error}
             </div>
           )}
@@ -277,14 +277,14 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ open, onOpenChange, mode 
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm"
+              className="btn-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!canSubmit || submitting}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-sm font-medium"
+              className="btn-primary disabled:opacity-60"
             >
               {submitting ? "Saving..." : mode === "create" ? "Create" : "Save Changes"}
             </button>

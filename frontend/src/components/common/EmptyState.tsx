@@ -13,7 +13,7 @@ export interface EmptyStateProps {
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-  icon = <InboxIcon className="w-12 h-12 text-slate-600" />,
+  icon = <InboxIcon className="w-12 h-12 text-slate-400" />,
   title,
   description,
   action,
@@ -22,14 +22,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   const content = (
     <div className="flex flex-col items-center gap-4 text-center">
       <div className="flex justify-center">{icon}</div>
-      <h3 className="text-lg font-semibold text-slate-200">{title}</h3>
+      <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
       {description && (
-        <p className="text-sm text-slate-400 max-w-xs">{description}</p>
+        <p className="text-sm text-slate-500 max-w-xs">{description}</p>
       )}
       {action && (
         <button
           onClick={action.onClick}
-          className="mt-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium transition-colors"
+          className="mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
         >
           {action.label}
         </button>
@@ -39,7 +39,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
         {content}
       </div>
     );

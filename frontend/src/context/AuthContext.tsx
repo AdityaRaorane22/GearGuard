@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { getCurrentUser, login as loginApi, logout as logoutApi, signup as signupApi, isAuthenticated } from "../services/authService";
+import { createContext, useContext, useState, ReactNode } from "react";
+import { login as loginApi, logout as logoutApi, signup as signupApi } from "../services/authService";
 import { User } from "../types";
 
 interface AuthContextValue {
@@ -14,27 +14,20 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // TEMPORARY: Dummy user to bypass login
+  const [user, setUser] = useState<User | null>({
+    id: "dummy-user-id",
+    email: "dev@example.com",
+    username: "devuser",
+    fullName: "Developer",
+    role: "admin",
+    isActive: true,
+  });
+  const [isLoading] = useState<boolean>(false);
 
   const refreshUser = async () => {
-    if (!isAuthenticated()) {
-      setUser(null);
-      return;
-    }
-    try {
-      const me = await getCurrentUser();
-      setUser(me);
-    } catch (err) {
-      // token invalid or request failed; clear user
-      setUser(null);
-    }
+    // Disabled for UI development
   };
-
-  useEffect(() => {
-    // On mount, fetch user if token exists
-    refreshUser().finally(() => setIsLoading(false));
-  }, []);
 
   const login = async (email: string, password: string) => {
     await loginApi(email, password);
@@ -43,7 +36,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signup = async (payload: { email: string; username: string; password: string; full_name?: string }) => {
     await signupApi(payload);
-    // Optionally auto-login after signup; here we just fetch user if token set by backend (not typical)
     await refreshUser();
   };
 
