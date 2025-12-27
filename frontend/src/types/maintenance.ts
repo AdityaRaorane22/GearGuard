@@ -17,20 +17,30 @@ export enum RequestPriority {
     URGENT = 'urgent'
 }
 
+export enum MaintenanceTargetType {
+    EQUIPMENT = 'equipment',
+    WORK_CENTER = 'work_center',
+}
+
+
 export interface MaintenanceRequest {
     id: number;
     subject: string;
-    description: string | null;
-    category: string;
-    status: string;
-    priority: string;
-    equipment_id: number;
+    description?: string;
+    category: RequestCategory;
+    priority: RequestPriority;
+
+    target_type: MaintenanceTargetType;
+    equipment_id?: number;
+    work_center_name?: string;
+
     requester_id: number;
-    technician_id: number | null;
-    maintenance_team_id?: number | null;
-    scheduled_date: string | null;
-    completion_date: string | null;
-    duration: number | null; // Duration in hours
+    technician_id?: number;
+    maintenance_team_id?: number;
+    status: RequestStatus;
+    scheduled_date?: string;
+    completion_date?: string;
+    duration?: number;
     created_at: string;
     updated_at: string;
     company: string;
@@ -41,11 +51,15 @@ export interface MaintenanceRequestCreate {
     description?: string;
     category: RequestCategory;
     priority: RequestPriority;
-    equipment_id: number;
+
+    target_type: MaintenanceTargetType;
+    equipment_id?: number | null;
+    work_center_name?: string | null;
+
     technician_id?: number | null;
     maintenance_team_id?: number | null;
     scheduled_date?: string | null;
-    duration: number | null; // Duration in hours
+    duration?: number | null; // Duration in hours
 }
 
 export interface MaintenanceRequestUpdate {

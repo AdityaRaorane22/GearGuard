@@ -8,7 +8,8 @@ import { equipmentApi } from '../services/equipmentApi';
 import { maintenanceApi } from '../services/maintenanceApi';
 import { teamsApi, MaintenanceTeam } from '../services/teamsApi';
 import { Equipment } from '../types/equipment';
-import { RequestCategory, RequestPriority, RequestStatus, MaintenanceRequestCreate } from '../types/maintenance';
+import { RequestCategory, RequestPriority, RequestStatus, MaintenanceRequestCreate, MaintenanceTargetType } from '../types/maintenance';
+import { STATIC_WORK_CENTERS } from '../data/workCenters';
 
 export const NewRequest: React.FC = () => {
     const { user, logout } = useAuth();
@@ -19,7 +20,11 @@ export const NewRequest: React.FC = () => {
     const [equipment, setEquipment] = useState<Equipment[]>([]);
     const [teams, setTeams] = useState<MaintenanceTeam[]>([]);
     const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(null);
+    const [selectedWorkCenterName, setSelectedWorkCenterName] = useState<string>('');
+
+    // Derived state for display
     const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+
     const [activeTab, setActiveTab] = useState<'notes' | 'instructions'>('notes');
     const [saving, setSaving] = useState(false);
 
@@ -28,14 +33,16 @@ export const NewRequest: React.FC = () => {
         description: '',
         category: RequestCategory.CORRECTIVE,
         priority: RequestPriority.MEDIUM,
-        equipment_id: 0,
+        target_type: MaintenanceTargetType.EQUIPMENT,
+        equipment_id: null,
+        work_center_name: null,
         technician_id: null,
         maintenance_team_id: null,
         scheduled_date: null,
         duration: null,
     });
 
-    // Fetch equipment and teams list on mount
+    // Fetch lists on mount
     useEffect(() => {
         fetchEquipment();
         fetchTeams();
@@ -45,8 +52,35 @@ export const NewRequest: React.FC = () => {
     useEffect(() => {
         if (selectedEquipmentId) {
             fetchEquipmentDetails(selectedEquipmentId);
+            setFormData(prev => ({ ...prev, equipment_id: selectedEquipmentId, work_center_name: null }));
+        } else {
+            setSelectedEquipment(null);
+            if (formData.target_type === MaintenanceTargetType.EQUIPMENT) {
+                setFormData(prev => ({ ...prev, equipment_id: null }));
+            }
         }
     }, [selectedEquipmentId]);
+
+    // Auto-fill when work center is selected
+    useEffect(() => {
+        if (selectedWorkCenterName) {
+            setFormData(prev => ({ ...prev, work_center_name: selectedWorkCenterName, equipment_id: null }));
+        } else {
+            if (formData.target_type === MaintenanceTargetType.WORK_CENTER) {
+                setFormData(prev => ({ ...prev, work_center_name: null }));
+            }
+        }
+    }, [selectedWorkCenterName]);
+
+    // Handle target type change
+    const handleTargetTypeChange = (type: MaintenanceTargetType) => {
+        setFormData(prev => ({
+            ...prev,
+            target_type: type,
+            equipment_id: type === MaintenanceTargetType.EQUIPMENT ? selectedEquipmentId : null,
+            work_center_name: type === MaintenanceTargetType.WORK_CENTER ? selectedWorkCenterName : null
+        }));
+    };
 
     const fetchEquipment = async () => {
         try {
@@ -56,6 +90,8 @@ export const NewRequest: React.FC = () => {
             showToast('Failed to load equipment', 'error');
         }
     };
+
+
 
     const fetchTeams = async () => {
         try {
@@ -85,10 +121,15 @@ export const NewRequest: React.FC = () => {
 
     const handleSave = async () => {
         // Validation
-        if (!formData.equipment_id) {
+        if (formData.target_type === MaintenanceTargetType.EQUIPMENT && !formData.equipment_id) {
             showToast('Please select an equipment', 'error');
             return;
         }
+        if (formData.target_type === MaintenanceTargetType.WORK_CENTER && !formData.work_center_name) {
+            showToast('Please select a work center', 'error');
+            return;
+        }
+
         if (!formData.subject.trim()) {
             showToast('Please enter a subject', 'error');
             return;
@@ -148,32 +189,83 @@ export const NewRequest: React.FC = () => {
                     {/* Main Form */}
                     <div className="card mb-6">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* LEFT COLUMN - Request & Equipment Context */}
+                            {/* LEFT COLUMN - Request & Equipment/WorkCenter Context */}
                             <div className="space-y-6">
                                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Request Details</h3>
 
-                                {/* Equipment Dropdown - MANDATORY */}
+                                {/* Target Type Selector */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Equipment <span className="text-red-500">*</span>
+                                        Maintenance For <span className="text-red-500">*</span>
                                     </label>
-                                    <select
-                                        value={selectedEquipmentId || ''}
-                                        onChange={(e) => setSelectedEquipmentId(Number(e.target.value))}
-                                        className="input-field"
-                                        required
-                                    >
-                                        <option value="">-- Select Equipment --</option>
-                                        {equipment.map((eq) => (
-                                            <option key={eq.id} value={eq.id}>
-                                                {eq.name} ({eq.serial_number})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="flex space-x-4">
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio text-primary-600 h-4 w-4"
+                                                checked={formData.target_type === MaintenanceTargetType.EQUIPMENT}
+                                                onChange={() => handleTargetTypeChange(MaintenanceTargetType.EQUIPMENT)}
+                                            />
+                                            <span className="ml-2 text-gray-700">Equipment</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio text-primary-600 h-4 w-4"
+                                                checked={formData.target_type === MaintenanceTargetType.WORK_CENTER}
+                                                onChange={() => handleTargetTypeChange(MaintenanceTargetType.WORK_CENTER)}
+                                            />
+                                            <span className="ml-2 text-gray-700">Work Center</span>
+                                        </label>
+                                    </div>
                                 </div>
 
-                                {/* Auto-filled fields (read-only) */}
-                                {selectedEquipment && (
+                                {/* Equipment Dropdown - Conditionally Shown */}
+                                {formData.target_type === MaintenanceTargetType.EQUIPMENT && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Equipment <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={selectedEquipmentId || ''}
+                                            onChange={(e) => setSelectedEquipmentId(Number(e.target.value))}
+                                            className="input-field"
+                                            required
+                                        >
+                                            <option value="">-- Select Equipment --</option>
+                                            {equipment.map((eq) => (
+                                                <option key={eq.id} value={eq.id}>
+                                                    {eq.name} ({eq.serial_number})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Work Center Dropdown - Conditionally Shown */}
+                                {formData.target_type === MaintenanceTargetType.WORK_CENTER && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Work Center <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={selectedWorkCenterName}
+                                            onChange={(e) => setSelectedWorkCenterName(e.target.value)}
+                                            className="input-field"
+                                            required
+                                        >
+                                            <option value="">-- Select Work Center --</option>
+                                            {STATIC_WORK_CENTERS.map((wc) => (
+                                                <option key={wc.id} value={wc.name}>
+                                                    {wc.name} ({wc.code})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Auto-filled fields (read-only) for Equipment */}
+                                {selectedEquipment && formData.target_type === MaintenanceTargetType.EQUIPMENT && (
                                     <>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -205,6 +297,9 @@ export const NewRequest: React.FC = () => {
                                         )}
                                     </>
                                 )}
+
+
+
 
                                 {/* Subject - MANDATORY */}
                                 <div>
@@ -324,17 +419,26 @@ export const NewRequest: React.FC = () => {
                                         className="input-field"
                                     >
                                         <option value="">To be assigned</option>
-                                        {formData.maintenance_team_id && teams.find(t => t.id === formData.maintenance_team_id)?.members.map(member => (
-                                            <option key={member.id} value={member.id}>
-                                                {member.full_name || member.email}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <p className="text-xs text-gray-500 mt-1">
                                         {formData.maintenance_team_id
-                                            ? "Showing members of the selected maintenance team"
-                                            : "Select a maintenance team (via equipment) to see available technicians"}
-                                    </p>
+                                            ? teams.find(t => t.id === formData.maintenance_team_id)?.members.map(member => (
+                                                <option key={member.id} value={member.id}>
+                                                    {member.full_name || member.email}
+                                                </option>
+                                            ))
+                                            : null // Optionally show all users or rely on team filter
+                                        }
+                                        {/* If no team is selected, maybe we shouldn't show any technicians or show all? 
+                                            For now, keeping it strict to team members if team is selected, 
+                                            but if we want to allow picking any technician for Work Center requests (which might not have a default team), 
+                                            we might need to fetch all technicians. 
+                                            However, as per requirements "Team & technician assignment applies", so we assume similar logic.
+                                        */}
+                                    </select>
+                                    {!formData.maintenance_team_id && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Select a maintenance team to filter available technicians
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -407,7 +511,11 @@ export const NewRequest: React.FC = () => {
                         <button
                             onClick={handleSave}
                             className="btn-primary"
-                            disabled={!selectedEquipmentId || !formData.subject.trim() || saving}
+                            disabled={
+                                (!selectedEquipmentId && !selectedWorkCenterName) ||
+                                !formData.subject.trim() ||
+                                saving
+                            }
                         >
                             {saving ? (
                                 <>

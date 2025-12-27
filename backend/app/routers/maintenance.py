@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from ..database import get_db
-from ..models import MaintenanceRequest, Equipment, User, RequestStatus
+from ..models import MaintenanceRequest, Equipment, User, RequestStatus, MaintenanceTargetType
 from ..schemas.maintenance import (
     MaintenanceRequestCreate,
     MaintenanceRequestUpdate,
@@ -70,18 +70,24 @@ def create_maintenance_request(
     Create a new maintenance request.
     
     Business rules:
-    - Equipment must exist
+    - Equipment must exist (if target is equipment)
     - Requester is automatically set to current user
     - Status is automatically set to NEW
-    - Company is inherited from equipment
+    - Company is inherited from equipment (or default for work center)
     """
-    # Validate equipment exists
-    equipment = db.query(Equipment).filter(Equipment.id == data.equipment_id).first()
-    if not equipment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Equipment with id {data.equipment_id} not found"
-        )
+    # Validate target and fetch company info
+    target_company = "Adani Enterprises"
+    
+    if data.target_type == MaintenanceTargetType.EQUIPMENT:
+        equipment = db.query(Equipment).filter(Equipment.id == data.equipment_id).first()
+        if not equipment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Equipment with id {data.equipment_id} not found"
+            )
+        target_company = equipment.company
+    
+    # For work center, just use the provided name (no validation needed)
     
     # Validate technician exists if provided
     if data.technician_id:
@@ -120,12 +126,16 @@ def create_maintenance_request(
         description=data.description,
         category=data.category,
         priority=data.priority,
+        
+        target_type=data.target_type,
         equipment_id=data.equipment_id,
+        work_center_name=data.work_center_name,
+        
         requester_id=current_user.id,
         technician_id=data.technician_id,
         scheduled_date=scheduled_datetime,
         status=RequestStatus.NEW,
-        company=equipment.company  # Inherit from equipment
+        company=target_company
     )
     
     db.add(request)

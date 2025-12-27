@@ -17,11 +17,18 @@ class RequestCategory(str, enum.Enum):
     PREVENTIVE = "preventive"
 
 
+
 class RequestPriority(str, enum.Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
+
+class MaintenanceTargetType(str, enum.Enum):
+    EQUIPMENT = "equipment"
+    WORK_CENTER = "work_center"
+
 
 
 class MaintenanceRequest(Base):
@@ -31,12 +38,26 @@ class MaintenanceRequest(Base):
     subject = Column(String, nullable=False, index=True)
     description = Column(String)
     category = Column(SQLEnum(RequestCategory), nullable=False)
+    
+    # Target definition
+    target_type = Column(
+    SQLEnum(
+        MaintenanceTargetType,
+        name="maintenancetargettype",
+        values_callable=lambda enum_cls: [e.value for e in enum_cls],
+        native_enum=True,
+        create_constraint=False,
+    ),
+    default=MaintenanceTargetType.EQUIPMENT,
+    nullable=False,
+        )
+    
     status = Column(SQLEnum(RequestStatus), default=RequestStatus.NEW)
     priority = Column(SQLEnum(RequestPriority), default=RequestPriority.MEDIUM)
     
     # Foreign keys
-    equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
-    requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=True)
+    work_center_name = Column(String, nullable=True)  # Simple string instead of FK
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     maintenance_team_id = Column(Integer, ForeignKey("maintenance_teams.id"), nullable=True)
@@ -53,7 +74,6 @@ class MaintenanceRequest(Base):
     
     # Relationships
     equipment = relationship("Equipment", back_populates="maintenance_requests")
-    requester = relationship("User", foreign_keys=[requester_id], backref="created_requests")
     requester = relationship("User", foreign_keys=[requester_id], backref="created_requests")
     technician = relationship("User", foreign_keys=[technician_id], backref="assigned_requests")
     maintenance_team = relationship("MaintenanceTeam", backref="requests")
