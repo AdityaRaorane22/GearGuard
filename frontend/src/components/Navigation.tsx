@@ -9,6 +9,7 @@ interface NavTab {
 const navigationTabs: NavTab[] = [
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Calendar', path: '/calendar' },
+    { name: 'Kanban', path: '/kanban' },
     { name: 'Equipment', path: '/equipment' },
     { name: 'Reporting', path: '/reporting' },
     { name: 'Teams', path: '/teams' },

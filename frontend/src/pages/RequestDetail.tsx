@@ -3,9 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { Navigation } from '../components/Navigation';
-import { StatusBadge } from '../components/StatusBadge';
 import { maintenanceApi } from '../services/maintenanceApi';
-import { MaintenanceRequest } from '../types/maintenance';
+import { MaintenanceRequest, RequestStatus } from '../types/maintenance';
 
 export const RequestDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -15,12 +14,20 @@ export const RequestDetail: React.FC = () => {
 
     const [request, setRequest] = useState<MaintenanceRequest | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedStatus, setSelectedStatus] = useState<RequestStatus | null>(null);
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         if (id) {
             fetchRequest();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (request) {
+            setSelectedStatus(request.status);
+        }
+    }, [request]);
 
     const fetchRequest = async () => {
         try {
@@ -35,6 +42,21 @@ export const RequestDetail: React.FC = () => {
         }
     };
 
+    const handleStatusUpdate = async () => {
+        if (!request || !selectedStatus || selectedStatus === request.status) return;
+
+        try {
+            setUpdating(true);
+            await maintenanceApi.update(request.id, { status: selectedStatus });
+            setRequest({ ...request, status: selectedStatus });
+            showToast('Status updated successfully', 'success');
+        } catch (err: any) {
+            showToast('Failed to update status', 'error');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     if (loading || !request) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -45,6 +67,8 @@ export const RequestDetail: React.FC = () => {
             </div>
         );
     }
+
+    const statusChanged = selectedStatus !== request.status;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -84,7 +108,27 @@ export const RequestDetail: React.FC = () => {
                             <h2 className="text-3xl font-bold text-gray-900">{request.subject}</h2>
                             <p className="text-gray-500 mt-1">Request #{request.id}</p>
                         </div>
-                        <StatusBadge status={request.status} size="lg" />
+                        <div className="flex items-center space-x-3">
+                            <select
+                                value={selectedStatus || ''}
+                                onChange={(e) => setSelectedStatus(e.target.value as RequestStatus)}
+                                className="input-field"
+                            >
+                                <option value={RequestStatus.NEW}>New</option>
+                                <option value={RequestStatus.IN_PROGRESS}>In Progress</option>
+                                <option value={RequestStatus.REPAIRED}>Repaired</option>
+                                <option value={RequestStatus.SCRAP}>Scrap</option>
+                            </select>
+                            {statusChanged && (
+                                <button
+                                    onClick={handleStatusUpdate}
+                                    disabled={updating}
+                                    className="btn-primary"
+                                >
+                                    {updating ? 'Updating...' : 'Update Status'}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Request Details */}

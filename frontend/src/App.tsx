@@ -14,6 +14,9 @@ import { Teams } from './pages/Teams';
 import { TeamForm } from './pages/TeamForm';
 import { NewRequest } from './pages/NewRequest';
 import { RequestDetail } from './pages/RequestDetail';
+import { Calendar } from './pages/Calendar';
+import { Reporting } from './pages/Reporting';
+import { Kanban } from './pages/Kanban';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -46,6 +49,24 @@ const AppRoutes: React.FC = () => {
                 element={
                     <ProtectedRoute roles={['Manager', 'Admin']}>
                         <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/calendar"
+                element={
+                    <ProtectedRoute>
+                        <Calendar />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/reporting"
+                element={
+                    <ProtectedRoute>
+                        <Reporting />
                     </ProtectedRoute>
                 }
             />
@@ -95,12 +116,12 @@ const AppRoutes: React.FC = () => {
                 }
             />
 
-            {/* Placeholder routes for future features */}
+            {/* Kanban Route */}
             <Route
                 path="/kanban"
                 element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <Kanban />
                     </ProtectedRoute>
                 }
             />
