@@ -11,14 +11,14 @@ export enum RequestCategory {
 }
 
 export interface DashboardMetrics {
-    criticalEquipment: {
+    critical_equipment: {
         count: number;
         healthPercentage: number;
     };
-    technicianLoad: {
+    technician_load: {
         utilizationPercentage: number;
     };
-    openRequests: {
+    open_requests: {
         total: number;
         overdue: number;
     };
@@ -29,14 +29,14 @@ export interface MaintenanceRequestSummary {
     subject: string;
     employee: string;
     technician: string;
-    category: RequestCategory;
-    status: RequestStatus;
+    category: string;
+    status: string;
     company: string;
-    scheduledDate: string;
-    isOverdue: boolean;
+    scheduled_date: string | null;
+    is_overdue: boolean;
 }
 
 export interface DashboardResponse {
     metrics: DashboardMetrics;
-    recentRequests: MaintenanceRequestSummary[];
+    recent_requests: MaintenanceRequestSummary[];
 }

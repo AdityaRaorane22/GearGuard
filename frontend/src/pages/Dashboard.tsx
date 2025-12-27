@@ -1,91 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { Navigation } from '../components/Navigation';
 import { DashboardCard } from '../components/DashboardCard';
-import { MaintenanceRequestSummary, RequestStatus, RequestCategory } from '../types/dashboard';
+import { MaintenanceRequestSummary, RequestStatus, DashboardResponse } from '../types/dashboard';
+import { dashboardApi } from '../services/dashboardApi';
 
-// Mock data for demonstration
-const mockMetrics = {
-    criticalEquipment: {
-        count: 12,
-        healthPercentage: 25,
-    },
-    technicianLoad: {
-        utilizationPercentage: 85,
-    },
-    openRequests: {
-        total: 34,
-        overdue: 8,
-    },
-};
-
-const mockRequests: MaintenanceRequestSummary[] = [
-    {
-        id: 1,
-        subject: 'Hydraulic Press - Oil Leak',
-        employee: 'John Smith',
-        technician: 'Mike Johnson',
-        category: RequestCategory.CORRECTIVE,
-        status: RequestStatus.IN_PROGRESS,
-        company: 'Adani Enterprises',
-        scheduledDate: '2024-01-15',
-        isOverdue: true,
-    },
-    {
-        id: 2,
-        subject: 'Conveyor Belt Alignment',
-        employee: 'Sarah Williams',
-        technician: 'David Brown',
-        category: RequestCategory.PREVENTIVE,
-        status: RequestStatus.NEW,
-        company: 'Adani Enterprises',
-        scheduledDate: '2024-01-20',
-        isOverdue: false,
-    },
-    {
-        id: 3,
-        subject: 'Generator - Routine Maintenance',
-        employee: 'Robert Davis',
-        technician: 'Mike Johnson',
-        category: RequestCategory.PREVENTIVE,
-        status: RequestStatus.NEW,
-        company: 'Adani Enterprises',
-        scheduledDate: '2024-01-18',
-        isOverdue: false,
-    },
-    {
-        id: 4,
-        subject: 'HVAC System - Temperature Control Issue',
-        employee: 'Emily Wilson',
-        technician: 'James Anderson',
-        category: RequestCategory.CORRECTIVE,
-        status: RequestStatus.REPAIRED,
-        company: 'Adani Enterprises',
-        scheduledDate: '2024-01-10',
-        isOverdue: false,
-    },
-    {
-        id: 5,
-        subject: 'Forklift Battery Replacement',
-        employee: 'Michael Brown',
-        technician: 'David Brown',
-        category: RequestCategory.CORRECTIVE,
-        status: RequestStatus.IN_PROGRESS,
-        company: 'Adani Enterprises',
-        scheduledDate: '2024-01-12',
-        isOverdue: true,
-    },
-];
-
-const getStatusBadge = (status: RequestStatus) => {
-    const statusConfig = {
-        [RequestStatus.NEW]: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'New' },
-        [RequestStatus.IN_PROGRESS]: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'In Progress' },
-        [RequestStatus.REPAIRED]: { bg: 'bg-green-100', text: 'text-green-800', label: 'Repaired' },
-        [RequestStatus.SCRAP]: { bg: 'bg-red-100', text: 'text-red-800', label: 'Scrap' },
+const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+        'new': { bg: 'bg-blue-100', text: 'text-blue-800', label: 'New' },
+        'in_progress': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'In Progress' },
+        'repaired': { bg: 'bg-green-100', text: 'text-green-800', label: 'Repaired' },
+        'scrap': { bg: 'bg-red-100', text: 'text-red-800', label: 'Scrap' },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig['new'];
     return (
         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}>
             {config.label}
@@ -95,21 +24,67 @@ const getStatusBadge = (status: RequestStatus) => {
 
 export const Dashboard: React.FC = () => {
     const { user, logout } = useAuth();
+    const { showToast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
+    const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Filter requests based on search query
+    // Fetch dashboard data
+    useEffect(() => {
+        const fetchDashboard = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await dashboardApi.getDashboardData(searchQuery);
+                setDashboardData(data);
+            } catch (err: any) {
+                const errorMessage = err.response?.data?.detail || 'Failed to load dashboard data';
+                setError(errorMessage);
+                showToast(errorMessage, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboard();
+    }, [searchQuery, showToast]);
+
+    // Filter requests based on search query (client-side filtering as fallback)
     const filteredRequests = useMemo(() => {
-        if (!searchQuery) return mockRequests;
+        if (!dashboardData) return [];
+        return dashboardData.recent_requests;
+    }, [dashboardData]);
 
-        const query = searchQuery.toLowerCase();
-        return mockRequests.filter(
-            (request) =>
-                request.subject.toLowerCase().includes(query) ||
-                request.employee.toLowerCase().includes(query) ||
-                request.technician.toLowerCase().includes(query) ||
-                request.category.toLowerCase().includes(query)
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                    <p className="mt-4 text-gray-600">Loading dashboard...</p>
+                </div>
+            </div>
         );
-    }, [searchQuery]);
+    }
+
+    if (error && !dashboardData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button onClick={() => window.location.reload()} className="btn-primary">
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const metrics = dashboardData?.metrics || {
+        critical_equipment: { count: 0, healthPercentage: 0 },
+        technician_load: { utilizationPercentage: 0 },
+        open_requests: { total: 0, overdue: 0 }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -150,10 +125,10 @@ export const Dashboard: React.FC = () => {
                         {/* Critical Equipment Card */}
                         <DashboardCard
                             title="Critical Equipment"
-                            value={mockMetrics.criticalEquipment.count}
-                            subtitle={`Health: ${mockMetrics.criticalEquipment.healthPercentage}% - Needs Attention`}
+                            value={metrics.critical_equipment.count}
+                            subtitle={`Health: ${metrics.critical_equipment.healthPercentage}% ${metrics.critical_equipment.healthPercentage < 30 ? '- Needs Attention' : ''}`}
                             color="red"
-                            warning={mockMetrics.criticalEquipment.healthPercentage < 30}
+                            warning={metrics.critical_equipment.healthPercentage < 30}
                             icon={
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -164,10 +139,10 @@ export const Dashboard: React.FC = () => {
                         {/* Technician Load Card */}
                         <DashboardCard
                             title="Technician Load"
-                            value={`${mockMetrics.technicianLoad.utilizationPercentage}%`}
-                            subtitle="Assign Carefully"
+                            value={`${metrics.technician_load.utilizationPercentage}%`}
+                            subtitle={metrics.technician_load.utilizationPercentage > 80 ? "Assign Carefully" : "Capacity Available"}
                             color="blue"
-                            warning={mockMetrics.technicianLoad.utilizationPercentage > 80}
+                            warning={metrics.technician_load.utilizationPercentage > 80}
                             icon={
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -178,10 +153,10 @@ export const Dashboard: React.FC = () => {
                         {/* Open Requests Card */}
                         <DashboardCard
                             title="Open Requests"
-                            value={mockMetrics.openRequests.total}
-                            subtitle={`${mockMetrics.openRequests.overdue} Overdue`}
-                            color={mockMetrics.openRequests.overdue > 0 ? 'yellow' : 'green'}
-                            warning={mockMetrics.openRequests.overdue > 0}
+                            value={metrics.open_requests.total}
+                            subtitle={`${metrics.open_requests.overdue} Overdue`}
+                            color={metrics.open_requests.overdue > 0 ? 'yellow' : 'green'}
+                            warning={metrics.open_requests.overdue > 0}
                             icon={
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />

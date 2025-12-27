@@ -53,12 +53,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             const response = await authApi.login({ email, password });
 
-            // Store token and user
+            // Store token and user in localStorage FIRST
             localStorage.setItem('token', response.access_token);
             localStorage.setItem('user', JSON.stringify(response.user));
 
+            // Then update state
             setToken(response.access_token);
             setUser(response.user);
+
+            // Small delay to ensure localStorage is written
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             // Navigate after successful login
             const redirectPath = getRedirectPath(response.user.role);

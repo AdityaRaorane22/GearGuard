@@ -70,10 +70,18 @@ def get_dashboard_data(
     )
     
     # Get recent maintenance requests with search filter
-    query = db.query(MaintenanceRequest).join(Equipment).join(
-        User, MaintenanceRequest.requester_id == User.id
+    from sqlalchemy.orm import aliased
+    
+    # Create aliases for the User table (requester and technician)
+    Requester = aliased(User)
+    Technician = aliased(User)
+    
+    query = db.query(MaintenanceRequest).join(
+        Equipment, MaintenanceRequest.equipment_id == Equipment.id
+    ).join(
+        Requester, MaintenanceRequest.requester_id == Requester.id
     ).outerjoin(
-        User, MaintenanceRequest.technician_id == User.id
+        Technician, MaintenanceRequest.technician_id == Technician.id
     )
     
     if search:
@@ -81,7 +89,8 @@ def get_dashboard_data(
         query = query.filter(
             (MaintenanceRequest.subject.ilike(search_filter)) |
             (Equipment.name.ilike(search_filter)) |
-            (User.name.ilike(search_filter))
+            (Requester.name.ilike(search_filter)) |
+            (Technician.name.ilike(search_filter))
         )
     
     requests = query.order_by(MaintenanceRequest.created_at.desc()).limit(10).all()
