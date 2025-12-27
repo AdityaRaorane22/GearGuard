@@ -1,14 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routers import auth
+from .routers import auth, dashboard
 
 # Initialize FastAPI app
-app = FastAPI(
-    title="GearGuard API",
-    description="Maintenance Management System API",
-    version="1.0.0"
-)
+app = FastAPI(title="GearGuard API")
 
 # Configure CORS
 app.add_middleware(
@@ -21,16 +17,13 @@ app.add_middleware(
 
 # Register routers
 app.include_router(auth.router)
+app.include_router(dashboard.router, prefix="/api")
 
 
 @app.get("/")
 def root():
     """Root endpoint"""
-    return {
-        "message": "Welcome to GearGuard API",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+    return {"message": "GearGuard API is running"}
 
 
 @app.get("/health")
